@@ -15,10 +15,16 @@ namespace Code.Common.StateMachine
 
     public class SyncStateMachine : IStateMachine<IState>, IDisposable
     {
+        #region State
         private IState[] _states;
+        #endregion
 
+
+        #region Props
         public IState CurrentState { get; private set; }
+        #endregion
 
+        #region Lifecycle
         public void Init(IState[] states)
         {
             if (states == null)
@@ -37,7 +43,20 @@ namespace Code.Common.StateMachine
             CurrentState = states[0];
             CurrentState.DidEnter(null);
         }
+        
+        public void Dispose()
+        {
+            if (CurrentState != null)
+            {
+                CurrentState.WillExit(null);
+                CurrentState = null;
+            }
+            
+            _states = null;
+        }
+        #endregion
 
+        #region Public
         public bool CanEnterState(Type type)
         {
             return CurrentState.IsValidNextState(type);
@@ -77,16 +96,6 @@ namespace Code.Common.StateMachine
         {
             CurrentState.Update(deltaTime);
         }
-
-        public void Dispose()
-        {
-            if (CurrentState == null)
-            {
-                return;
-            }
-            CurrentState.WillExit(null);
-            CurrentState = null;
-            _states = null;
-        }
+        #endregion
     }
 }
